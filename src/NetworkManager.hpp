@@ -22,7 +22,7 @@ class NetworkManager {
 	NetworkManager(const std::string nome_interface);
 	virtual ~NetworkManager();
 
-	void sync();
+	void sync(unsigned char current_sequence=0);
 
 	bool sendFile(std::string filename);
 	void receiveFile(std::string& filepath);

@@ -57,6 +57,6 @@ int Socket::send(std::vector<unsigned char>& dados){
 }
 
 int Socket::receive(std::vector<unsigned char>& buffer){
-    return recv(this->soquete, buffer.data(), buffer.size(), 0);
+	return recv(this->soquete, buffer.data(), buffer.size(), 0);
 }
 

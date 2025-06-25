@@ -102,11 +102,6 @@ void GameClient::run(){
 				//descartar teclas apertadas durante recebimento
 				while (this->window->pollEvent());
 
-			}else if (m.getType() == EnumMessageType::HANDSHAKE){
-				px=py=-1;
-				this->window->updateCounter(0);
-				this->window->clearImages();
-				this->netManager->sendAndWait(EnumMessageType::INIT);
 			}
 		}
 

@@ -138,28 +138,31 @@ bool NetworkManager::sendAndWait(EnumMessageType type, std::vector<unsigned char
 	this->enqueue(type, data);
 
 	//seq da ultima mensagem, a mensagem desejada que faz essa funcao terminar
-	unsigned char seq {this->sendQueue.back().getSequence()};
+	unsigned char seq =  {this->sendQueue.back().getSequence()};
 	this->send();//envia mensagens na janela
 
 	//sai do loop quando recebe ack de 'seq'
 	std::optional<Message> mOpt;
 	Message m;
 	
-	int countErros {0};//NACKs ou TOs
+	int countErros {0};//NACKs ou TOs consecutivos
 
 	//timeout referente a janela, se mover janela timer reinicia
 	long long start = this->timestamp_ms();
 	while (true){
-		if (countErros >= 10){
-			this->sync();
-			return false;
+		if (countErros >= 100){
+			this->sync(this->sendQueue.front().getSequence());
+#ifdef DEBUG
+			std::cout << "Error Limit" << std::endl;
+#endif
+			countErros = 0;
 		}
 
 		if (this->timestamp_ms() - start >= NetworkManager::TIMEOUT_INTERVAL_MS){
 #ifdef DEBUG
-			std::cout << "Contador de Erros de Envio" << countErros << std::endl;
+			std::cout << "Timeout" << countErros << std::endl;
 #endif
-			countErros++;	
+			countErros++;
 			this->send();
 			start = this->timestamp_ms();//reseta timer
 		}
@@ -172,10 +175,16 @@ bool NetworkManager::sendAndWait(EnumMessageType type, std::vector<unsigned char
 		if (m.getType() == EnumMessageType::ACK || m.getType() == EnumMessageType::NACK){
 			//se for a msg esperada, verifica tamanho pra evitar msgs de msm sequencia
 			if (m.getData()[0] == seq && this->sendQueue.size() <= NetworkManager::SLIDING_WINDOW_SIZE)
-				return true;	
+				return true;
 
-			if (m.getType() == EnumMessageType::NACK)
+			if (m.getType() == EnumMessageType::NACK){
 				countErros++;
+#ifdef DEBUG
+			std::cout << "NACK" << countErros<<std::endl;
+#endif	
+		} else
+				countErros = 0;
+
 			start = this->timestamp_ms();//reseta timer pois recebeu resposta
 		} else if (m.getType() == EnumMessageType::ERROR){
 			this->logString = "Erro Ao Enviar Arquivo: ";
@@ -188,7 +197,8 @@ bool NetworkManager::sendAndWait(EnumMessageType type, std::vector<unsigned char
 					this->logString += "Erro Desconhecido";
 			}
 			return false;
-		}else countErros++;
+		}else countErros=0;
+
 	}
 }
 
@@ -227,8 +237,7 @@ void NetworkManager::receiveFile(std::string& filepath){
 		if (m.getType() == EnumMessageType::DATA){
 			std::vector<unsigned char> v = m.getData();
 			data.insert(data.end(), v.begin(), v.end());
-		} else if (m.getType() == HANDSHAKE)
-			return;
+		}
 
 	} while(m.getType() != EnumMessageType::END_OF_FILE);
 	
@@ -248,14 +257,13 @@ void NetworkManager::receiveFile(std::string& filepath){
 	this->logString="";//recebeu sem erros
 }
 
-void NetworkManager::sync(){
-	this->sendQueue.clear();
+void NetworkManager::sync(unsigned char current_sequence){
 	long long start = timestamp_ms();
 	while(1){
 		if (timestamp_ms() - start > NetworkManager::TIMEOUT_INTERVAL_MS){
 			this->socket->send(Message(0, EnumMessageType::HANDSHAKE,{
 				(unsigned char)((this->lastReceivedSequence +1)%32),
-				(unsigned char)((this->messageSequence -1)%32)
+				(unsigned char)((current_sequence -1)%32)
 			}));//envia infos de handshake
 			start = timestamp_ms();
 		}
@@ -295,7 +303,6 @@ bool NetworkManager::flowControl(Message msg){
 	}
 
 	if (msg.getType() == EnumMessageType::HANDSHAKE){
-		this->sendQueue.clear();
 		this->messageSequence = msg.getData()[0];
 		this->lastReceivedSequence = msg.getData()[1];
 		this->socket->send(Message(0,EnumMessageType::ACK, {this->lastReceivedSequence}));
@@ -380,7 +387,7 @@ bool NetworkManager::flowControl(Message msg){
 
 	if (msgSeq != expectedSeq){
 		if (this->emJanelaAnterior(msg.getSequence(), expectedSeq)){
-
+			
 			this->socket->send(Message(0,EnumMessageType::ACK,{this->lastReceivedSequence}));
 		}
 		else
