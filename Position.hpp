@@ -16,7 +16,6 @@ class Position {
     
 	int x, y;
 };
-
 	std::ostream& operator<<(std::ostream& os, const Position& pos);
 }
 

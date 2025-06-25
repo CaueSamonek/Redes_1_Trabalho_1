@@ -7,9 +7,8 @@ namespace cat {
 
 class GameConfig {
   public:
+	//diretorio destino dos arquivos recebidos
 	static constexpr const char* DESTINY_DIR_PATH {"received/"};
-
-
 
 	//nome e tamanho da janela
 	static constexpr const char* WINDOW_NAME {"Caça Ao Tesouro Very Poggers >:D"};

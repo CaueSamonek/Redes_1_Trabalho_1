@@ -92,18 +92,17 @@ void GameClient::run(){
 				//pega variaveis necessarias pra interface
    				std::string display =  std::string(std::getenv("DISPLAY"));
 			    std::string xauth = std::string(std::getenv("XAUTHORITY"));
-
+				
+				//exibe arquivo
 				std::string bashCMD {"sudo DISPLAY=" + display
 									+" XAUTHORITY=" + xauth
 									+" open " + filepath};
-
 				std::system(bashCMD.c_str());
 
 				//descartar teclas apertadas durante recebimento
 				while (this->window->pollEvent());
 
-			}else
-			if (m.getType() == EnumMessageType::HANDSHAKE){
+			}else if (m.getType() == EnumMessageType::HANDSHAKE){
 				px=py=-1;
 				this->window->updateCounter(0);
 				this->window->clearImages();
@@ -152,7 +151,6 @@ void GameClient::errorCheck(int px, int py){
 void GameClient::addGrid(){
 	for (int i{0}; i < GameConfig::GRID_NUM_ROWS; ++i)
 		for (int j{0}; j < GameConfig::GRID_NUM_COLUMNS; ++j){
-
 			sf::RectangleShape r = sf::RectangleShape({GameConfig::GRID_TILE_WIDTH,
 													GameConfig::GRID_TILE_HEIGHT});
 

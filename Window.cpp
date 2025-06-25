@@ -159,7 +159,7 @@ void Window::setPlayerPosition(float center_x, float center_y){
 	if (center_x < 0 || center_y < 0 || this->sprites.empty())
 		return;
 
-	//se existe um player, ele fica no index 0
+	//player sempre deixado no index 0
 	this->sprites[0].setPosition({
 		center_x * GameConfig::GRID_TILE_WIDTH + GameConfig::GRID_TILE_WIDTH/2,
 		center_y * GameConfig::GRID_TILE_HEIGHT + GameConfig::GRID_TILE_HEIGHT + GameConfig::HEADER_PADDING_Y/3

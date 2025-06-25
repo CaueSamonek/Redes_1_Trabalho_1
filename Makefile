@@ -16,8 +16,6 @@ all: $(OBJETCS) $(EXECS)
 debug: CFLAGS += -DDEBUG
 debug: all
 
-
-
 servidor: $(SERVER) $(OBJECTS)
 	@echo "👷⚒️  Construindo Servidor:" $@
 	@$(CC) $(CFLAGS) -o $@ $< $(OBJECTS) $(LDFLAGS)
