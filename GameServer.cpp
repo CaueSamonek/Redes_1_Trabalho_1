@@ -22,8 +22,6 @@ GameServer::GameServer(std::string interface_name, Position gridMax) : gridMax{g
 	std::sort(filenames.begin(),filenames.end());	
     std::srand(static_cast<unsigned int>(std::time(0)));
     this->createTreasures(filenames);
-	//diretorio destino de arquivos transferidos
-	fs::create_directories(GameConfig::DESTINY_DIR_PATH);
 }
 
 GameServer::~GameServer(){

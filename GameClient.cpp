@@ -12,6 +12,7 @@
 #include <sys/statvfs.h>//ver espaco livre
 #include <sys/stat.h>//ver tamanho de arquivo
 
+namespace fs = std::filesystem;
 using namespace cat;
 
 GameClient::GameClient(std::string nome_interface){
@@ -25,6 +26,9 @@ GameClient::GameClient(std::string nome_interface){
 	this->window->setFootprintIcon(GameConfig::FOOTPRINT_ICON_PATH);
 	this->addText();
 	this->addGrid();
+	
+	//diretorio destino de arquivos transferidos
+	fs::create_directories(GameConfig::DESTINY_DIR_PATH);
 }
 
 GameClient::~GameClient(){
